@@ -1,56 +1,1524 @@
-import { useEffect, useState } from 'react';
-import { Routes, Route, Link, NavLink, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowDownRight, ArrowUpRight, Github, Linkedin, Mail, Code2, Terminal, Database, Cloud, Sparkles, Menu, X, Layers3, ExternalLink, Trash2, Pencil, Plus, LogOut, LayoutDashboard, FolderKanban, MessageSquare, UserRound, CheckCircle2 } from 'lucide-react';
-import api from './lib/api.js';
+import { useEffect, useState } from "react";
+import { Routes, Route, Link, NavLink, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Github,
+  Linkedin,
+  Mail,
+  Code2,
+  Terminal,
+  Database,
+  Cloud,
+  Sparkles,
+  Menu,
+  X,
+  Layers3,
+  ExternalLink,
+  Trash2,
+  Pencil,
+  Plus,
+  LogOut,
+  LayoutDashboard,
+  FolderKanban,
+  MessageSquare,
+  UserRound,
+  CheckCircle2,
+} from "lucide-react";
+import api from "./lib/api.js";
 
 const fallbackProjects = [
- { _id:'streamlingo',title:'StreamLingo',slug:'streamlingo',shortDescription:'A real-time streaming concept bringing multilingual chat experiences closer together.',description:'A project focused on live experiences, real-time messaging and translation workflows.',category:'Real-time',technologies:['React','Node.js','Socket.IO','MongoDB','Redis'],featured:true,status:'published',repositoryUrl:'',liveDemoUrl:'' },
- { _id:'nexora',title:'Nexora AI',slug:'nexora-ai',shortDescription:'An AI chat experience exploring retrieval-augmented generation and semantic search.',description:'An AI application exploring embeddings, vector search and response caching.',category:'AI / GenAI',technologies:['React','Node.js','MongoDB','Gemini API','RAG','Redis'],featured:true,status:'published',repositoryUrl:'',liveDemoUrl:'' },
- { _id:'wanderlust',title:'Wanderlust',slug:'wanderlust',shortDescription:'A full-stack accommodation listing app with a familiar travel marketplace flow.',description:'A full-stack web application built to practice CRUD, authentication and media uploads.',category:'Full Stack',technologies:['EJS','Node.js','Express','MongoDB','Cloudinary'],featured:true,status:'published',repositoryUrl:'',liveDemoUrl:'' },
- { _id:'scalex',title:'Scalable API Lab',slug:'scalable-api-lab',shortDescription:'Hands-on experiments with API throughput, containers and reverse proxies.',description:'A learning project for comparing load-test results and understanding bottlenecks.',category:'Backend',technologies:['Node.js','Docker','Nginx','k6','AWS'],featured:false,status:'published',repositoryUrl:'',liveDemoUrl:'' }
+  {
+    _id: "streamlingo",
+    title: "StreamLingo",
+    slug: "streamlingo",
+    shortDescription:
+      "A real-time streaming concept bringing multilingual chat experiences closer together.",
+    description:
+      "A project focused on live experiences, real-time messaging and translation workflows.",
+    category: "Real-time",
+    technologies: ["React", "Node.js", "Socket.IO", "MongoDB", "Redis"],
+    featured: true,
+    status: "published",
+    repositoryUrl: "",
+    liveDemoUrl: "",
+  },
+  {
+    _id: "nexora",
+    title: "Nexora AI",
+    slug: "nexora-ai",
+    shortDescription:
+      "An AI chat experience exploring retrieval-augmented generation and semantic search.",
+    description:
+      "An AI application exploring embeddings, vector search and response caching.",
+    category: "AI / GenAI",
+    technologies: ["React", "Node.js", "MongoDB", "Gemini API", "RAG", "Redis"],
+    featured: true,
+    status: "published",
+    repositoryUrl: "",
+    liveDemoUrl: "",
+  },
+  {
+    _id: "wanderlust",
+    title: "Wanderlust",
+    slug: "wanderlust",
+    shortDescription:
+      "A full-stack accommodation listing app with a familiar travel marketplace flow.",
+    description:
+      "A full-stack web application built to practice CRUD, authentication and media uploads.",
+    category: "Full Stack",
+    technologies: ["EJS", "Node.js", "Express", "MongoDB", "Cloudinary"],
+    featured: true,
+    status: "published",
+    repositoryUrl: "",
+    liveDemoUrl: "",
+  },
+  {
+    _id: "scalex",
+    title: "Scalable API Lab",
+    slug: "scalable-api-lab",
+    shortDescription:
+      "Hands-on experiments with API throughput, containers and reverse proxies.",
+    description:
+      "A learning project for comparing load-test results and understanding bottlenecks.",
+    category: "Backend",
+    technologies: ["Node.js", "Docker", "Nginx", "k6", "AWS"],
+    featured: false,
+    status: "published",
+    repositoryUrl: "",
+    liveDemoUrl: "",
+  },
 ];
-function Header({profile}) { const [open,setOpen]=useState(false); const links=[['About','#about'],['Skills','#skills'],['Projects','#projects'],['Journey','#journey'],['Contact','#contact']]; return <header className="nav"><Link className="brand" to="/"><span className="brand-mark">AV</span><span>Ankur<span className="muted">.dev</span></span></Link><button className="mobile-toggle" onClick={()=>setOpen(!open)} aria-label="Toggle navigation">{open?<X/>:<Menu/>}</button><nav className={open?'nav-links open':'nav-links'}>{links.map(([label,href])=><a key={label} href={href} onClick={()=>setOpen(false)}>{label}</a>)}<a className="nav-admin" href="/admin">Admin <ArrowUpRight size={14}/></a></nav></header> }
-function ProjectCard({project}) { return <motion.article className="project-card" initial={{opacity:0,y:16}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.4}}><div className="project-art">{project.coverImage?.url?<img className="project-cover-image" src={project.coverImage.url} alt={`${project.title} cover`} loading="lazy"/>:<><div className="art-orbit orbit-one"/><div className="art-orbit orbit-two"/><div className="art-icon"><Code2 size={31}/></div><span className="art-number">{project.category || 'Engineering'}</span></>}</div><div className="project-body"><div className="project-title-row"><h3>{project.title}</h3>{project.featured&&<span className="featured-dot">FEATURED</span>}</div><p>{project.shortDescription}</p><div className="tags">{(project.technologies||[]).slice(0,5).map(t=><span key={t}>{t}</span>)}</div><div className="project-links">{project.repositoryUrl?<a href={project.repositoryUrl} target="_blank" rel="noreferrer">Source code <ArrowUpRight size={15}/></a>:<span className="muted small">Links can be added in admin</span>}{project.liveDemoUrl&&<a href={project.liveDemoUrl} target="_blank" rel="noreferrer">Live demo <ExternalLink size={14}/></a>}</div></div></motion.article> }
+function Header({ profile }) {
+  const [open, setOpen] = useState(false);
+  const links = [
+    ["About", "#about"],
+    ["Skills", "#skills"],
+    ["Projects", "#projects"],
+    ["Journey", "#journey"],
+    ["Contact", "#contact"],
+  ];
+  return (
+    <header className="nav">
+      <Link className="brand" to="/">
+        <span className="brand-mark">AV</span>
+        <span>
+          Ankur<span className="muted">.dev</span>
+        </span>
+      </Link>
+      <button
+        className="mobile-toggle"
+        onClick={() => setOpen(!open)}
+        aria-label="Toggle navigation"
+      >
+        {open ? <X /> : <Menu />}
+      </button>
+      <nav className={open ? "nav-links open" : "nav-links"}>
+        {links.map(([label, href]) => (
+          <a key={label} href={href} onClick={() => setOpen(false)}>
+            {label}
+          </a>
+        ))}
+        <a className="nav-admin" href="/admin">
+          Admin <ArrowUpRight size={14} />
+        </a>
+      </nav>
+    </header>
+  );
+}
+function ProjectCard({ project }) {
+  return (
+    <motion.article
+      className="project-card"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
+    >
+      <div className="project-art">
+        {project.coverImage?.url ? (
+          <img
+            className="project-cover-image"
+            src={project.coverImage.url}
+            alt={`${project.title} cover`}
+            loading="lazy"
+          />
+        ) : (
+          <>
+            <div className="art-orbit orbit-one" />
+            <div className="art-orbit orbit-two" />
+            <div className="art-icon">
+              <Code2 size={31} />
+            </div>
+            <span className="art-number">
+              {project.category || "Engineering"}
+            </span>
+          </>
+        )}
+      </div>
+      <div className="project-body">
+        <div className="project-title-row">
+          <h3>{project.title}</h3>
+          {project.featured && <span className="featured-dot">FEATURED</span>}
+        </div>
+        <p>{project.shortDescription}</p>
+        <div className="tags">
+          {(project.technologies || []).slice(0, 5).map((t) => (
+            <span key={t}>{t}</span>
+          ))}
+        </div>
+        <div className="project-links">
+          {project.repositoryUrl ? (
+            <a href={project.repositoryUrl} target="_blank" rel="noreferrer">
+              Source code <ArrowUpRight size={15} />
+            </a>
+          ) : (
+            <span className="muted small">Links can be added in admin</span>
+          )}
+          {project.liveDemoUrl && (
+            <a href={project.liveDemoUrl} target="_blank" rel="noreferrer">
+              Live demo <ExternalLink size={14} />
+            </a>
+          )}
+        </div>
+      </div>
+    </motion.article>
+  );
+}
 function Home() {
- const [profile,setProfile]=useState({name:'Ankur Verma',headline:'Full Stack Developer | Backend Engineering Enthusiast',biography:'I build modern web applications, real-time systems, and AI-powered experiences with a focus on backend engineering and scalable architecture.',email:'ankurver413@gmail.com',github:'https://github.com/ankurverma786',linkedin:'https://www.linkedin.com/in/ankur0003/',availability:true});
- const [projects,setProjects]=useState(fallbackProjects),[skills,setSkills]=useState([]),[experience,setExperience]=useState([]),[form,setForm]=useState({name:'',email:'',subject:'',message:'',website:''}),[sending,setSending]=useState(false),[notice,setNotice]=useState('');
- useEffect(()=>{api.get('/profile').then(r=>setProfile(p=>({...p,...r.data}))).catch(()=>{});api.get('/projects').then(r=>{if(r.data.items?.length || r.data.total===0)setProjects(r.data.items)}).catch(()=>{});api.get('/skills').then(r=>setSkills(r.data)).catch(()=>{});api.get('/experience').then(r=>setExperience(r.data)).catch(()=>{});},[]);
- const groupedSkills=skills.length?skills.reduce((acc,s)=>{(acc[s.category]??=[]).push(s.name);return acc;},{}):{'Languages':['JavaScript','C++','Java'],'Frontend':['React','HTML','CSS','Tailwind CSS'],'Backend':['Node.js','Express.js','REST APIs','Socket.IO'],'Databases':['MongoDB','MySQL','Redis'],'Cloud & DevOps':['AWS','Docker','Nginx','GitHub Actions','PM2'],'AI / GenAI':['Gemini API','RAG','Embeddings','Vector Search']};
- async function submit(e){e.preventDefault();setSending(true);setNotice('');try{const r=await api.post('/contact',form);setNotice(r.data.message);setForm({name:'',email:'',subject:'',message:'',website:''});}catch(err){setNotice(err.response?.data?.message||'Could not send your message. Check that the backend is running.');}finally{setSending(false)}}
- return <><Header profile={profile}/><main><section className="hero wrap"><div className="hero-copy"><div className="eyebrow"><span className="pulse"/>{profile.availability?'OPEN TO OPPORTUNITIES':'BUILDING & LEARNING'}</div><h1>Building digital<br/>experiences that <span className="gradient-text">scale.</span></h1><p className="hero-sub">Hey, I'm <strong>{profile.name}</strong> — a developer drawn to the intersection of thoughtful interfaces, reliable backends, and systems that solve real problems.</p><div className="hero-actions"><a className="btn btn-primary" href="#projects">Explore my work <ArrowDownRight size={17}/></a><a className="btn btn-ghost" href="#contact">Let's talk <ArrowUpRight size={16}/></a></div><div className="social-row"><a href={profile.github} target="_blank" rel="noreferrer"><Github size={17}/> GitHub</a><a href={profile.linkedin} target="_blank" rel="noreferrer"><Linkedin size={17}/> LinkedIn</a><a href={`mailto:${profile.email}`}><Mail size={17}/> Email</a></div></div><div className="hero-visual"><div className="visual-grid"/><div className="terminal-card"><div className="terminal-top"><span/><span/><span/><label>ankur@dev ~</label></div><div className="terminal-content"><div className="terminal-muted">// a little about my mindset</div><p><b>const</b> developer = {'{'}</p><p className="indent">focus: <em>'backend systems'</em>,</p><p className="indent">build: <em>'useful things'</em>,</p><p className="indent">learn: <em>'every single day'</em></p><p>{'}'};</p><div className="terminal-bottom"><span className="terminal-prompt">➜</span> <span className="typing">ready_to_build()</span><span className="cursor"/></div></div></div><div className="floating-chip chip-one"><Database size={15}/> Data & APIs</div><div className="floating-chip chip-two"><Sparkles size={15}/> AI experiments</div><div className="hero-glow"/></div><a href="#about" className="scroll-note">SCROLL TO EXPLORE <span/></a></section>
- <section id="about" className="section wrap"><div className="section-heading"><span className="section-index">01 / ABOUT</span><h2>Curious by default.<br/><span className="muted">Engineer by practice.</span></h2></div><div className="about-grid"><div className="about-lead"><Sparkles className="section-icon"/><p>{profile.biography}</p></div><div className="about-details"><div className="detail-line"><span>Currently</span><strong>BSc (PCM) Graduate</strong></div><div className="detail-line"><span>Focus</span><strong>Backend engineering & full-stack apps</strong></div><div className="detail-line"><span>Based in</span><strong>{profile.location || 'India'}</strong></div><div className="detail-line"><span>Mindset</span><strong>Ship, measure, improve.</strong></div></div></div></section>
- <section id="skills" className="section section-tint"><div className="wrap"><div className="section-heading"><span className="section-index">02 / TOOLKIT</span><h2>Tools I use to<br/><span className="muted">turn ideas into systems.</span></h2><p className="section-description">A practical toolkit that keeps evolving with every project.</p></div><div className="skills-grid">{Object.entries(groupedSkills).map(([group,items],i)=><motion.div className="skill-card" key={group} initial={{opacity:0,y:14}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:i*.04}}><div className="skill-card-top"><span className="skill-icon">{i===0?<Terminal/>:i===1?<Layers3/>:i===2?<Code2/>:i===3?<Database/>:i===4?<Cloud/>:<Sparkles/>}</span><span className="skill-count">{String(i+1).padStart(2,'0')}</span></div><h3>{group}</h3><div className="skill-list">{items.map(s=><span key={s}>{s}</span>)}</div></motion.div>)}</div></div></section>
- <section id="projects" className="section wrap"><div className="section-heading heading-row"><div><span className="section-index">03 / SELECTED WORK</span><h2>Projects with a<br/><span className="muted">purpose behind the code.</span></h2></div><span className="project-count">{projects.length.toString().padStart(2,'0')} PROJECTS</span></div><div className="projects-grid">{projects.map(p=><ProjectCard key={p._id||p.slug} project={p}/>)}</div><p className="honesty-note"><span/> Project descriptions are a snapshot of ongoing learning and work. Only verified features and real links should be published.</p></section>
- <section id="journey" className="section section-tint"><div className="wrap"><div className="section-heading"><span className="section-index">04 / THE JOURNEY</span><h2>Learning in public.<br/><span className="muted">One build at a time.</span></h2></div><div className="timeline">{(experience.length?experience:[{_id:'edu',type:'education',title:'BSc (Physics, Chemistry & Mathematics)',organization:'Graduate',startDate:'Completed',endDate:'',description:'Built a foundation in analytical thinking and problem-solving while developing practical full-stack engineering skills through projects.'},{_id:'build',type:'project',title:'Learning by building',organization:'Personal projects',startDate:'Ongoing',endDate:'',description:'Exploring APIs, authentication, real-time communication, AI workflows, caching and deployment.'}]).map((e,i)=><div className="timeline-item" key={e._id}><span className="timeline-marker"/><div className="timeline-date">{e.startDate||'ONGOING'} {e.endDate?`— ${e.endDate}`:''}</div><div><h3>{e.title}</h3><div className="timeline-org">{e.organization}</div><p>{e.description}</p></div></div>)}</div></div></section>
- <section id="contact" className="section wrap"><div className="contact-panel"><div className="contact-copy"><span className="section-index">05 / SAY HELLO</span><h2>Have a good idea?<br/><span className="gradient-text">Let's build it.</span></h2><p>Open to meaningful conversations, collaboration, and opportunities to learn and contribute.</p><a className="contact-email" href={`mailto:${profile.email}`}>{profile.email} <ArrowUpRight size={17}/></a><div className="social-row"><a href={profile.github} target="_blank" rel="noreferrer"><Github size={17}/> GitHub</a><a href={profile.linkedin} target="_blank" rel="noreferrer"><Linkedin size={17}/> LinkedIn</a></div></div><form className="contact-form" onSubmit={submit}><div className="form-pair"><label>Your name<input required maxLength="80" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Jane Doe"/></label><label>Email address<input required type="email" maxLength="160" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="jane@company.com"/></label></div><label>Subject<input required maxLength="160" value={form.subject} onChange={e=>setForm({...form,subject:e.target.value})} placeholder="Let's talk about..."/></label><label>Message<textarea required rows="4" maxLength="3000" value={form.message} onChange={e=>setForm({...form,message:e.target.value})} placeholder="Tell me a little about it..."/></label><input className="honeypot" tabIndex="-1" autoComplete="off" aria-hidden="true" value={form.website} onChange={e=>setForm({...form,website:e.target.value})}/><button className="btn btn-primary submit-btn" disabled={sending}>{sending?'Sending...':'Send message'} <ArrowUpRight size={17}/></button>{notice&&<p className="form-notice" role="status">{notice}</p>}</form></div></section></main><footer className="footer wrap"><Link className="brand" to="/"><span className="brand-mark">AV</span><span>Ankur<span className="muted">.dev</span></span></Link><span>Designed with intent. Built with curiosity.</span><a href="#top" onClick={e=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'})}}>Back to top ↑</a><span>© {new Date().getFullYear()} Ankur Verma</span></footer></>;
+  const [profile, setProfile] = useState({
+    name: "Ankur Verma",
+    headline: "Full Stack Developer | Backend Engineering Enthusiast",
+    biography:
+      "I build modern web applications, real-time systems, and AI-powered experiences with a focus on backend engineering and scalable architecture.",
+    email: "ankurver413@gmail.com",
+    github: "https://github.com/ankurverma786",
+    linkedin: "https://www.linkedin.com/in/ankur0003/",
+    availability: true,
+  });
+  const [projects, setProjects] = useState(fallbackProjects),
+    [skills, setSkills] = useState([]),
+    [experience, setExperience] = useState([]),
+    [form, setForm] = useState({
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+      website: "",
+    }),
+    [sending, setSending] = useState(false),
+    [notice, setNotice] = useState("");
+  useEffect(() => {
+    api
+      .get("/profile")
+      .then((r) => setProfile((p) => ({ ...p, ...r.data })))
+      .catch(() => {});
+    api
+      .get("/projects")
+      .then((r) => {
+        if (r.data.items?.length || r.data.total === 0)
+          setProjects(r.data.items);
+      })
+      .catch(() => {});
+    api
+      .get("/skills")
+      .then((r) => setSkills(r.data))
+      .catch(() => {});
+    api
+      .get("/experience")
+      .then((r) => setExperience(r.data))
+      .catch(() => {});
+  }, []);
+  const groupedSkills = skills.length
+    ? skills.reduce((acc, s) => {
+        (acc[s.category] ??= []).push(s.name);
+        return acc;
+      }, {})
+    : {
+        Languages: ["JavaScript", "C++", "Java"],
+        Frontend: ["React", "HTML", "CSS", "Tailwind CSS"],
+        Backend: ["Node.js", "Express.js", "REST APIs", "Socket.IO"],
+        Databases: ["MongoDB", "MySQL", "Redis"],
+        "Cloud & DevOps": ["AWS", "Docker", "Nginx", "GitHub Actions", "PM2"],
+        "AI / GenAI": ["Gemini API", "RAG", "Embeddings", "Vector Search"],
+      };
+  async function submit(e) {
+    e.preventDefault();
+    setSending(true);
+    setNotice("");
+    try {
+      const r = await api.post("/contact", form);
+      setNotice(r.data.message);
+      setForm({ name: "", email: "", subject: "", message: "", website: "" });
+    } catch (err) {
+      setNotice(
+        err.response?.data?.message ||
+          "Could not send your message. Check that the backend is running.",
+      );
+    } finally {
+      setSending(false);
+    }
+  }
+  return (
+    <>
+      <Header profile={profile} />
+      <main>
+        <section className="hero wrap">
+          <div className="hero-copy">
+            <div className="eyebrow">
+              <span className="pulse" />
+              {profile.availability
+                ? "OPEN TO OPPORTUNITIES"
+                : "BUILDING & LEARNING"}
+            </div>
+            <h1>
+              Building digital
+              <br />
+              experiences that <span className="gradient-text">scale.</span>
+            </h1>
+            <p className="hero-sub">
+              Hey, I'm <strong>{profile.name}</strong> — a developer drawn to
+              the intersection of thoughtful interfaces, reliable backends, and
+              systems that solve real problems.
+            </p>
+            <div className="hero-actions">
+              <a className="btn btn-primary" href="#projects">
+                Explore my work <ArrowDownRight size={17} />
+              </a>
+              <a className="btn btn-ghost" href="#contact">
+                Let's talk <ArrowUpRight size={16} />
+              </a>
+            </div>
+            <div className="social-row">
+              <a href={profile.github} target="_blank" rel="noreferrer">
+                <Github size={17} /> GitHub
+              </a>
+              <a href={profile.linkedin} target="_blank" rel="noreferrer">
+                <Linkedin size={17} /> LinkedIn
+              </a>
+              <a href={`mailto:${profile.email}`}>
+                <Mail size={17} /> Email
+              </a>
+            </div>
+          </div>
+          <div className="hero-visual">
+            <div className="visual-grid" />
+            <div className="terminal-card">
+              <div className="terminal-top">
+                <span />
+                <span />
+                <span />
+                <label>ankur@dev ~</label>
+              </div>
+              <div className="terminal-content">
+                <div className="terminal-muted">
+                  // a little about my mindset
+                </div>
+                <p>
+                  <b>const</b> developer = {"{"}
+                </p>
+                <p className="indent">
+                  focus: <em>'backend systems'</em>,
+                </p>
+                <p className="indent">
+                  build: <em>'useful things'</em>,
+                </p>
+                <p className="indent">
+                  learn: <em>'every single day'</em>
+                </p>
+                <p>{"}"};</p>
+                <div className="terminal-bottom">
+                  <span className="terminal-prompt">➜</span>{" "}
+                  <span className="typing">ready_to_build()</span>
+                  <span className="cursor" />
+                </div>
+              </div>
+            </div>
+            <div className="floating-chip chip-one">
+              <Database size={15} /> Data & APIs
+            </div>
+            <div className="floating-chip chip-two">
+              <Sparkles size={15} /> AI experiments
+            </div>
+            <div className="hero-glow" />
+          </div>
+          <a href="#about" className="scroll-note">
+            SCROLL TO EXPLORE <span />
+          </a>
+        </section>
+        <section id="about" className="section wrap">
+          <div className="section-heading">
+            <span className="section-index">01 / ABOUT</span>
+            <h2>
+              Curious by default.
+              <br />
+              <span className="muted">Engineer by practice.</span>
+            </h2>
+          </div>
+          <div className="about-grid">
+            <div className="about-lead">
+              <Sparkles className="section-icon" />
+              <p>{profile.biography}</p>
+            </div>
+            <div className="about-details">
+              <div className="detail-line">
+                <span>Currently</span>
+                <strong>BCA Graduate</strong>
+              </div>
+              <div className="detail-line">
+                <span>Focus</span>
+                <strong>Backend engineering & full-stack apps</strong>
+              </div>
+              <div className="detail-line">
+                <span>Based in</span>
+                <strong>{profile.location || "India"}</strong>
+              </div>
+              <div className="detail-line">
+                <span>Mindset</span>
+                <strong>Ship, measure, improve.</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="skills" className="section section-tint">
+          <div className="wrap">
+            <div className="section-heading">
+              <span className="section-index">02 / TOOLKIT</span>
+              <h2>
+                Tools I use to
+                <br />
+                <span className="muted">turn ideas into systems.</span>
+              </h2>
+              <p className="section-description">
+                A practical toolkit that keeps evolving with every project.
+              </p>
+            </div>
+            <div className="skills-grid">
+              {Object.entries(groupedSkills).map(([group, items], i) => (
+                <motion.div
+                  className="skill-card"
+                  key={group}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.04 }}
+                >
+                  <div className="skill-card-top">
+                    <span className="skill-icon">
+                      {i === 0 ? (
+                        <Terminal />
+                      ) : i === 1 ? (
+                        <Layers3 />
+                      ) : i === 2 ? (
+                        <Code2 />
+                      ) : i === 3 ? (
+                        <Database />
+                      ) : i === 4 ? (
+                        <Cloud />
+                      ) : (
+                        <Sparkles />
+                      )}
+                    </span>
+                    <span className="skill-count">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <h3>{group}</h3>
+                  <div className="skill-list">
+                    {items.map((s) => (
+                      <span key={s}>{s}</span>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section id="projects" className="section wrap">
+          <div className="section-heading heading-row">
+            <div>
+              <span className="section-index">03 / SELECTED WORK</span>
+              <h2>
+                Projects with a<br />
+                <span className="muted">purpose behind the code.</span>
+              </h2>
+            </div>
+            <span className="project-count">
+              {projects.length.toString().padStart(2, "0")} PROJECTS
+            </span>
+          </div>
+          <div className="projects-grid">
+            {projects.map((p) => (
+              <ProjectCard key={p._id || p.slug} project={p} />
+            ))}
+          </div>
+          <p className="honesty-note">
+            <span /> Project descriptions are a snapshot of ongoing learning and
+            work. Only verified features and real links should be published.
+          </p>
+        </section>
+        <section id="journey" className="section section-tint">
+          <div className="wrap">
+            <div className="section-heading">
+              <span className="section-index">04 / THE JOURNEY</span>
+              <h2>
+                Learning in public.
+                <br />
+                <span className="muted">One build at a time.</span>
+              </h2>
+            </div>
+            <div className="timeline">
+              {(experience.length
+                ? experience
+                : [
+                    {
+                      _id: "edu",
+                      type: "education",
+                      title: "BSc (Physics, Chemistry & Mathematics)",
+                      organization: "Graduate",
+                      startDate: "Completed",
+                      endDate: "",
+                      description:
+                        "Built a foundation in analytical thinking and problem-solving while developing practical full-stack engineering skills through projects.",
+                    },
+                    {
+                      _id: "build",
+                      type: "project",
+                      title: "Learning by building",
+                      organization: "Personal projects",
+                      startDate: "Ongoing",
+                      endDate: "",
+                      description:
+                        "Exploring APIs, authentication, real-time communication, AI workflows, caching and deployment.",
+                    },
+                  ]
+              ).map((e, i) => (
+                <div className="timeline-item" key={e._id}>
+                  <span className="timeline-marker" />
+                  <div className="timeline-date">
+                    {e.startDate || "ONGOING"}{" "}
+                    {e.endDate ? `— ${e.endDate}` : ""}
+                  </div>
+                  <div>
+                    <h3>{e.title}</h3>
+                    <div className="timeline-org">{e.organization}</div>
+                    <p>{e.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section id="contact" className="section wrap">
+          <div className="contact-panel">
+            <div className="contact-copy">
+              <span className="section-index">05 / SAY HELLO</span>
+              <h2>
+                Have a good idea?
+                <br />
+                <span className="gradient-text">Let's build it.</span>
+              </h2>
+              <p>
+                Open to meaningful conversations, collaboration, and
+                opportunities to learn and contribute.
+              </p>
+              <a className="contact-email" href={`mailto:${profile.email}`}>
+                {profile.email} <ArrowUpRight size={17} />
+              </a>
+              <div className="social-row">
+                <a href={profile.github} target="_blank" rel="noreferrer">
+                  <Github size={17} /> GitHub
+                </a>
+                <a href={profile.linkedin} target="_blank" rel="noreferrer">
+                  <Linkedin size={17} /> LinkedIn
+                </a>
+              </div>
+            </div>
+            <form className="contact-form" onSubmit={submit}>
+              <div className="form-pair">
+                <label>
+                  Your name
+                  <input
+                    required
+                    maxLength="80"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    placeholder="Jane Doe"
+                  />
+                </label>
+                <label>
+                  Email address
+                  <input
+                    required
+                    type="email"
+                    maxLength="160"
+                    value={form.email}
+                    onChange={(e) =>
+                      setForm({ ...form, email: e.target.value })
+                    }
+                    placeholder="jane@company.com"
+                  />
+                </label>
+              </div>
+              <label>
+                Subject
+                <input
+                  required
+                  maxLength="160"
+                  value={form.subject}
+                  onChange={(e) =>
+                    setForm({ ...form, subject: e.target.value })
+                  }
+                  placeholder="Let's talk about..."
+                />
+              </label>
+              <label>
+                Message
+                <textarea
+                  required
+                  rows="4"
+                  maxLength="3000"
+                  value={form.message}
+                  onChange={(e) =>
+                    setForm({ ...form, message: e.target.value })
+                  }
+                  placeholder="Tell me a little about it..."
+                />
+              </label>
+              <input
+                className="honeypot"
+                tabIndex="-1"
+                autoComplete="off"
+                aria-hidden="true"
+                value={form.website}
+                onChange={(e) => setForm({ ...form, website: e.target.value })}
+              />
+              <button className="btn btn-primary submit-btn" disabled={sending}>
+                {sending ? "Sending..." : "Send message"}{" "}
+                <ArrowUpRight size={17} />
+              </button>
+              {notice && (
+                <p className="form-notice" role="status">
+                  {notice}
+                </p>
+              )}
+            </form>
+          </div>
+        </section>
+      </main>
+      <footer className="footer wrap">
+        <Link className="brand" to="/">
+          <span className="brand-mark">AV</span>
+          <span>
+            Ankur<span className="muted">.dev</span>
+          </span>
+        </Link>
+        <span>Designed with intent. Built with curiosity.</span>
+        <a
+          href="#top"
+          onClick={(e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        >
+          Back to top ↑
+        </a>
+        <span>© {new Date().getFullYear()} Ankur Verma</span>
+      </footer>
+    </>
+  );
 }
-function AdminLogin(){const [email,setEmail]=useState(''),[password,setPassword]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);const nav=useNavigate();async function submit(e){e.preventDefault();setBusy(true);setError('');try{const r=await api.post('/auth/login',{email,password});localStorage.setItem('portfolio_admin_token',r.data.token);nav('/admin/dashboard')}catch(e){setError(e.response?.data?.message||'Could not connect to API. Is the backend running?')}finally{setBusy(false)}}return <div className="admin-login-page"><Link className="brand login-brand" to="/"><span className="brand-mark">AV</span><span>Ankur<span className="muted">.dev</span></span></Link><form className="login-card" onSubmit={submit}><div className="admin-symbol"><LayoutDashboard/></div><span className="section-index">PRIVATE WORKSPACE</span><h1>Welcome back.</h1><p>Sign in to manage your portfolio.</p><label>Email address<input type="email" required autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)} placeholder="admin@example.com"/></label><label>Password<input type="password" required autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Your admin password"/></label>{error&&<div className="error-box">{error}</div>}<button className="btn btn-primary submit-btn" disabled={busy}>{busy?'Signing in...':'Sign in securely'} <ArrowUpRight size={16}/></button><Link className="back-link" to="/">← Back to portfolio</Link></form></div>}
-function AdminShell(){const nav=useNavigate();const [admin,setAdmin]=useState(null),[section,setSection]=useState('overview'),[projects,setProjects]=useState([]),[stats,setStats]=useState({}),[messages,setMessages]=useState([]),[profile,setProfile]=useState({}),[skills,setSkills]=useState([]),[loading,setLoading]=useState(true),[notice,setNotice]=useState('');const [editing,setEditing]=useState(null);const [draft,setDraft]=useState({title:'',shortDescription:'',description:'',category:'Full Stack',technologies:'',features:'',repositoryUrl:'',liveDemoUrl:'',caseStudyUrl:'',coverImage:{url:'',publicId:''},featured:false,status:'draft'});
- async function load(){setLoading(true);try{const [me,st,ps,ms,pr,sk]=await Promise.all([api.get('/auth/me'),api.get('/admin/dashboard'),api.get('/admin/projects'),api.get('/admin/messages'),api.get('/profile'),api.get('/skills')]);setAdmin(me.data.admin);setStats(st.data);setProjects(ps.data);setMessages(ms.data);setProfile(pr.data);setSkills(sk.data);}catch(e){if(e.response?.status===401)nav('/admin');else setNotice(e.response?.data?.message||'Could not load admin data.');}finally{setLoading(false)}}
- useEffect(()=>{load()},[]);
- async function logout(){await api.post('/auth/logout').catch(()=>{});localStorage.removeItem('portfolio_admin_token');nav('/admin')}
- function newProject(){setEditing('new');setDraft({title:'',shortDescription:'',description:'',category:'Full Stack',technologies:'',features:'',repositoryUrl:'',liveDemoUrl:'',caseStudyUrl:'',coverImage:{url:'',publicId:''},featured:false,status:'draft'});setSection('projects')}
- function editProject(p){setEditing(p._id);setDraft({...p,technologies:(p.technologies||[]).join(', '),features:(p.features||[]).join('\n')});setSection('projects')}
- async function saveProject(e){e.preventDefault();const body={...draft,technologies:draft.technologies.split(',').map(x=>x.trim()).filter(Boolean),features:draft.features.split('\n').map(x=>x.trim()).filter(Boolean)};try{if(editing==='new')await api.post('/admin/projects',body);else await api.patch(`/admin/projects/${editing}`,body);setNotice('Project saved successfully.');setEditing(null);await load()}catch(e){setNotice(e.response?.data?.message||'Could not save project.')}}
- async function uploadCoverImage(file){if(!file)return;const form=new FormData();form.append('image',file);try{setNotice('Uploading image…');const response=await api.post('/admin/uploads',form);setDraft(d=>({...d,coverImage:response.data}));setNotice('Cover image uploaded. Save the project to keep it.')}catch(e){setNotice(e.response?.data?.message||'Image upload failed. Check Cloudinary environment variables.')}}
- async function deleteProject(p){if(!confirm(`Delete “${p.title}”? This cannot be undone.`))return;try{await api.delete(`/admin/projects/${p._id}`);setNotice('Project deleted.');await load()}catch(e){setNotice(e.response?.data?.message||'Delete failed.')}}
- async function togglePublish(p){try{await api.patch(`/admin/projects/${p._id}/publish`,{status:p.status==='published'?'draft':'published'});await load()}catch(e){setNotice(e.response?.data?.message||'Could not update status.')}}
- async function saveProfile(e){e.preventDefault();try{await api.patch('/admin/profile',profile);setNotice('Profile updated.')}catch(e){setNotice(e.response?.data?.message||'Could not save profile.')}}
- async function markRead(m){try{await api.patch(`/admin/messages/${m._id}/read`,{isRead:!m.isRead});await load()}catch(e){setNotice('Could not update message.') }}
- async function deleteMessage(m){if(!confirm('Delete this contact message?'))return;try{await api.delete(`/admin/messages/${m._id}`);await load()}catch(e){setNotice('Could not delete message.') }}
- async function addSkill(e){e.preventDefault();const f=new FormData(e.currentTarget);try{await api.post('/admin/skills',{name:f.get('name'),category:f.get('category')});e.currentTarget.reset();await load();setNotice('Skill added.')}catch(e){setNotice(e.response?.data?.message||'Could not add skill.')}}
- async function deleteSkill(s){if(!confirm(`Delete skill ${s.name}?`))return;try{await api.delete(`/admin/skills/${s._id}`);await load()}catch(e){setNotice('Could not delete skill.')}}
- const menu=[['overview','Overview',LayoutDashboard],['projects','Projects',FolderKanban],['profile','Profile',UserRound],['skills','Skills',Code2],['messages','Messages',MessageSquare]];
- if(loading&&!admin)return <div className="loading-screen">Loading your workspace…</div>;
- return <div className="admin-layout"><aside className="admin-sidebar"><Link className="brand" to="/"><span className="brand-mark">AV</span><span>Ankur<span className="muted">.dev</span></span></Link><div className="admin-side-label">WORKSPACE</div>{menu.map(([key,label,Icon])=><button key={key} className={`side-link ${section===key?'active':''}`} onClick={()=>{setSection(key);setEditing(null);setNotice('')}}><Icon size={17}/>{label}{key==='messages'&&stats.unreadMessages>0&&<span className="side-count">{stats.unreadMessages}</span>}</button>)}<div className="sidebar-bottom"><div className="admin-avatar">{admin?.email?.[0]?.toUpperCase()||'A'}</div><div className="admin-user"><strong>Administrator</strong><span>{admin?.email}</span></div><button className="icon-button" onClick={logout} aria-label="Log out"><LogOut size={17}/></button></div></aside><main className="admin-main"><header className="admin-topbar"><div><span className="section-index">ANKUR.DEV / ADMIN</span><h1>{menu.find(m=>m[0]===section)?.[1]||'Dashboard'}</h1></div><a href="/" className="btn btn-ghost small-btn" target="_blank" rel="noreferrer">View site <ArrowUpRight size={15}/></a></header>{notice&&<div className="notice-banner"><CheckCircle2 size={16}/>{notice}<button onClick={()=>setNotice('')}><X size={14}/></button></div>}
- {section==='overview'&&<><div className="admin-stats">{[['Total projects',stats.totalProjects,FolderKanban],['Published',stats.publishedProjects,CheckCircle2],['Drafts',stats.draftProjects,Layers3],['Featured',stats.featuredProjects,Sparkles],['Messages',stats.totalMessages,MessageSquare],['Unread',stats.unreadMessages,Mail]].map(([label,value,Icon])=><div className="stat-card" key={label}><div className="stat-icon"><Icon size={18}/></div><span>{label}</span><strong>{value??'—'}</strong></div>)}</div><div className="admin-panel"><div className="panel-heading"><div><h2>Recent projects</h2><p>Keep your best work fresh and accurate.</p></div><button className="btn btn-primary small-btn" onClick={newProject}><Plus size={15}/> Add project</button></div><ProjectTable projects={projects.slice(0,5)} editProject={editProject} deleteProject={deleteProject} togglePublish={togglePublish}/></div><div className="admin-panel"><div className="panel-heading"><div><h2>Latest messages</h2><p>Recent conversations from your contact form.</p></div><button className="text-action" onClick={()=>setSection('messages')}>View all →</button></div><MessageList messages={messages.slice(0,4)} markRead={markRead} deleteMessage={deleteMessage}/></div></>}
- {section==='projects'&&<div className="admin-panel"><div className="panel-heading"><div><h2>{editing?'Edit project':'Project library'}</h2><p>Create, update, publish or remove portfolio projects.</p></div>{!editing&&<button className="btn btn-primary small-btn" onClick={newProject}><Plus size={15}/> New project</button>}</div>{editing?<form className="project-editor" onSubmit={saveProject}><div className="form-pair"><label>Project title *<input required value={draft.title||''} onChange={e=>setDraft({...draft,title:e.target.value})}/></label><label>Category<input value={draft.category||''} onChange={e=>setDraft({...draft,category:e.target.value})}/></label></div><label>Short description *<textarea required maxLength="240" rows="2" value={draft.shortDescription||''} onChange={e=>setDraft({...draft,shortDescription:e.target.value})}/></label><label>Detailed description<textarea rows="4" value={draft.description||''} onChange={e=>setDraft({...draft,description:e.target.value})}/></label><label>Technologies <span className="muted">(comma separated)</span><input value={draft.technologies||''} onChange={e=>setDraft({...draft,technologies:e.target.value})} placeholder="React, Node.js, MongoDB"/></label><label>Key features <span className="muted">(one per line)</span><textarea rows="3" value={draft.features||''} onChange={e=>setDraft({...draft,features:e.target.value})}/></label><label>Cover image <span className="muted">(JPG, PNG or WEBP; max 5 MB)</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>uploadCoverImage(e.target.files?.[0])}/>{draft.coverImage?.url&&<div className="cover-preview"><img src={draft.coverImage.url} alt="Project cover preview"/><button type="button" className="text-action danger-text" onClick={()=>setDraft({...draft,coverImage:{url:'',publicId:''}})}>Remove image</button></div>}</label><div className="form-pair"><label>GitHub URL<input type="url" value={draft.repositoryUrl||''} onChange={e=>setDraft({...draft,repositoryUrl:e.target.value})} placeholder="https://github.com/..."/></label><label>Live demo URL<input type="url" value={draft.liveDemoUrl||''} onChange={e=>setDraft({...draft,liveDemoUrl:e.target.value})} placeholder="https://..."/></label></div><label>Case study URL<input type="url" value={draft.caseStudyUrl||''} onChange={e=>setDraft({...draft,caseStudyUrl:e.target.value})}/></label><div className="editor-options"><label className="checkbox-label"><input type="checkbox" checked={Boolean(draft.featured)} onChange={e=>setDraft({...draft,featured:e.target.checked})}/> Featured project</label><label>Status<select value={draft.status||'draft'} onChange={e=>setDraft({...draft,status:e.target.value})}><option value="draft">Draft</option><option value="published">Published</option></select></label></div><div className="editor-actions"><button type="button" className="btn btn-ghost" onClick={()=>setEditing(null)}>Cancel</button><button className="btn btn-primary">Save project <ArrowUpRight size={15}/></button></div><p className="muted small">Images require Cloudinary credentials in the backend environment. Save the project after uploading its cover image.</p></form>:<ProjectTable projects={projects} editProject={editProject} deleteProject={deleteProject} togglePublish={togglePublish}/>}</div>}
- {section==='profile'&&<div className="admin-panel"><div className="panel-heading"><div><h2>Public profile</h2><p>Changes appear on the public portfolio.</p></div></div><form className="project-editor" onSubmit={saveProfile}><label>Full name<input value={profile.name||''} onChange={e=>setProfile({...profile,name:e.target.value})}/></label><label>Headline<input value={profile.headline||''} onChange={e=>setProfile({...profile,headline:e.target.value})}/></label><label>Biography<textarea rows="5" value={profile.biography||''} onChange={e=>setProfile({...profile,biography:e.target.value})}/></label><div className="form-pair"><label>Location<input value={profile.location||''} onChange={e=>setProfile({...profile,location:e.target.value})}/></label><label>Email<input type="email" value={profile.email||''} onChange={e=>setProfile({...profile,email:e.target.value})}/></label></div><div className="form-pair"><label>GitHub URL<input value={profile.github||''} onChange={e=>setProfile({...profile,github:e.target.value})}/></label><label>LinkedIn URL<input value={profile.linkedin||''} onChange={e=>setProfile({...profile,linkedin:e.target.value})}/></label></div><label>LeetCode URL<input value={profile.leetcode||''} onChange={e=>setProfile({...profile,leetcode:e.target.value})}/></label><label>Resume URL<input value={profile.resumeUrl||''} onChange={e=>setProfile({...profile,resumeUrl:e.target.value})} placeholder="Public PDF URL"/></label><label className="checkbox-label"><input type="checkbox" checked={profile.availability!==false} onChange={e=>setProfile({...profile,availability:e.target.checked})}/> Show open-to-opportunities badge</label><div className="editor-actions"><button className="btn btn-primary">Save profile <ArrowUpRight size={15}/></button></div></form></div>}
- {section==='skills'&&<div className="admin-panel"><div className="panel-heading"><div><h2>Skills library</h2><p>Add or remove skills shown on your portfolio.</p></div></div><form className="add-skill-form" onSubmit={addSkill}><input name="name" required placeholder="Skill name (e.g. TypeScript)"/><input name="category" required placeholder="Category (e.g. Backend)"/><button className="btn btn-primary small-btn"><Plus size={15}/> Add skill</button></form><div className="admin-skill-list">{skills.map(s=><div className="admin-skill" key={s._id}><span>{s.name}</span><small>{s.category}</small><button className="icon-button danger" onClick={()=>deleteSkill(s)} aria-label={`Delete ${s.name}`}><Trash2 size={15}/></button></div>)}{!skills.length&&<p className="empty-state">No database skills yet. The public site uses a starter toolkit until you add your own.</p>}</div></div>}
- {section==='messages'&&<div className="admin-panel"><div className="panel-heading"><div><h2>Inbox</h2><p>Messages submitted through your public contact form.</p></div></div><MessageList messages={messages} markRead={markRead} deleteMessage={deleteMessage}/></div>}
- </main></div>
+function AdminLogin() {
+  const [email, setEmail] = useState(""),
+    [password, setPassword] = useState(""),
+    [error, setError] = useState(""),
+    [busy, setBusy] = useState(false);
+  const nav = useNavigate();
+  async function submit(e) {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      const r = await api.post("/auth/login", { email, password });
+      localStorage.setItem("portfolio_admin_token", r.data.token);
+      nav("/admin/dashboard");
+    } catch (e) {
+      setError(
+        e.response?.data?.message ||
+          "Could not connect to API. Is the backend running?",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="admin-login-page">
+      <Link className="brand login-brand" to="/">
+        <span className="brand-mark">AV</span>
+        <span>
+          Ankur<span className="muted">.dev</span>
+        </span>
+      </Link>
+      <form className="login-card" onSubmit={submit}>
+        <div className="admin-symbol">
+          <LayoutDashboard />
+        </div>
+        <span className="section-index">PRIVATE WORKSPACE</span>
+        <h1>Welcome back.</h1>
+        <p>Sign in to manage your portfolio.</p>
+        <label>
+          Email address
+          <input
+            type="email"
+            required
+            autoComplete="username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="admin@example.com"
+          />
+        </label>
+        <label>
+          Password
+          <input
+            type="password"
+            required
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Your admin password"
+          />
+        </label>
+        {error && <div className="error-box">{error}</div>}
+        <button className="btn btn-primary submit-btn" disabled={busy}>
+          {busy ? "Signing in..." : "Sign in securely"}{" "}
+          <ArrowUpRight size={16} />
+        </button>
+        <Link className="back-link" to="/">
+          ← Back to portfolio
+        </Link>
+      </form>
+    </div>
+  );
 }
-function ProjectTable({projects,editProject,deleteProject,togglePublish}){return <div className="table-wrap"><table className="admin-table"><thead><tr><th>Project</th><th>Status</th><th>Featured</th><th>Updated</th><th>Actions</th></tr></thead><tbody>{projects.map(p=><tr key={p._id}><td><strong>{p.title}</strong><span className="table-sub">{p.category} · {p.slug}</span></td><td><button className={`status-pill ${p.status}`} onClick={()=>togglePublish(p)}>{p.status==='published'?'Published':'Draft'}</button></td><td>{p.featured?'Yes':'—'}</td><td>{p.updatedAt?new Date(p.updatedAt).toLocaleDateString():'—'}</td><td><div className="table-actions"><button className="icon-button" onClick={()=>editProject(p)} aria-label="Edit project"><Pencil size={15}/></button><button className="icon-button danger" onClick={()=>deleteProject(p)} aria-label="Delete project"><Trash2 size={15}/></button></div></td></tr>)}</tbody></table>{!projects.length&&<p className="empty-state">No projects yet. Create your first project to get started.</p>}</div>}
-function MessageList({messages,markRead,deleteMessage}){return <div className="messages-list">{messages.map(m=><article className={`message-item ${m.isRead?'read':''}`} key={m._id}><div className="message-avatar">{m.name?.[0]?.toUpperCase()||'?'}</div><div className="message-content"><div className="message-heading"><strong>{m.name}</strong><span>{new Date(m.createdAt).toLocaleString()}</span></div><div className="message-subject">{m.subject} · {m.email}</div><p>{m.message}</p><div className="message-actions"><button className="text-action" onClick={()=>markRead(m)}>{m.isRead?'Mark unread':'Mark read'}</button><button className="text-action danger-text" onClick={()=>deleteMessage(m)}>Delete</button></div></div>{!m.isRead&&<span className="unread-indicator"/>}</article>)}{!messages.length&&<p className="empty-state">Your inbox is empty for now. New contact form submissions will appear here.</p>}</div>}
-export default function App(){return <Routes><Route path="/" element={<Home/>}/><Route path="/admin" element={<AdminLogin/>}/><Route path="/admin/*" element={<AdminShell/>}/><Route path="*" element={<Home/>}/></Routes>}
+function AdminShell() {
+  const nav = useNavigate();
+  const [admin, setAdmin] = useState(null),
+    [section, setSection] = useState("overview"),
+    [projects, setProjects] = useState([]),
+    [stats, setStats] = useState({}),
+    [messages, setMessages] = useState([]),
+    [profile, setProfile] = useState({}),
+    [skills, setSkills] = useState([]),
+    [loading, setLoading] = useState(true),
+    [notice, setNotice] = useState("");
+  const [editing, setEditing] = useState(null);
+  const [draft, setDraft] = useState({
+    title: "",
+    shortDescription: "",
+    description: "",
+    category: "Full Stack",
+    technologies: "",
+    features: "",
+    repositoryUrl: "",
+    liveDemoUrl: "",
+    caseStudyUrl: "",
+    coverImage: { url: "", publicId: "" },
+    featured: false,
+    status: "draft",
+  });
+  async function load() {
+    setLoading(true);
+    try {
+      const [me, st, ps, ms, pr, sk] = await Promise.all([
+        api.get("/auth/me"),
+        api.get("/admin/dashboard"),
+        api.get("/admin/projects"),
+        api.get("/admin/messages"),
+        api.get("/profile"),
+        api.get("/skills"),
+      ]);
+      setAdmin(me.data.admin);
+      setStats(st.data);
+      setProjects(ps.data);
+      setMessages(ms.data);
+      setProfile(pr.data);
+      setSkills(sk.data);
+    } catch (e) {
+      if (e.response?.status === 401) nav("/admin");
+      else setNotice(e.response?.data?.message || "Could not load admin data.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    load();
+  }, []);
+  async function logout() {
+    await api.post("/auth/logout").catch(() => {});
+    localStorage.removeItem("portfolio_admin_token");
+    nav("/admin");
+  }
+  function newProject() {
+    setEditing("new");
+    setDraft({
+      title: "",
+      shortDescription: "",
+      description: "",
+      category: "Full Stack",
+      technologies: "",
+      features: "",
+      repositoryUrl: "",
+      liveDemoUrl: "",
+      caseStudyUrl: "",
+      coverImage: { url: "", publicId: "" },
+      featured: false,
+      status: "draft",
+    });
+    setSection("projects");
+  }
+  function editProject(p) {
+    setEditing(p._id);
+    setDraft({
+      ...p,
+      technologies: (p.technologies || []).join(", "),
+      features: (p.features || []).join("\n"),
+    });
+    setSection("projects");
+  }
+  async function saveProject(e) {
+    e.preventDefault();
+    const body = {
+      ...draft,
+      technologies: draft.technologies
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean),
+      features: draft.features
+        .split("\n")
+        .map((x) => x.trim())
+        .filter(Boolean),
+    };
+    try {
+      if (editing === "new") await api.post("/admin/projects", body);
+      else await api.patch(`/admin/projects/${editing}`, body);
+      setNotice("Project saved successfully.");
+      setEditing(null);
+      await load();
+    } catch (e) {
+      setNotice(e.response?.data?.message || "Could not save project.");
+    }
+  }
+  async function uploadCoverImage(file) {
+    if (!file) return;
+    const form = new FormData();
+    form.append("image", file);
+    try {
+      setNotice("Uploading image…");
+      const response = await api.post("/admin/uploads", form);
+      setDraft((d) => ({ ...d, coverImage: response.data }));
+      setNotice("Cover image uploaded. Save the project to keep it.");
+    } catch (e) {
+      setNotice(
+        e.response?.data?.message ||
+          "Image upload failed. Check Cloudinary environment variables.",
+      );
+    }
+  }
+  async function deleteProject(p) {
+    if (!confirm(`Delete “${p.title}”? This cannot be undone.`)) return;
+    try {
+      await api.delete(`/admin/projects/${p._id}`);
+      setNotice("Project deleted.");
+      await load();
+    } catch (e) {
+      setNotice(e.response?.data?.message || "Delete failed.");
+    }
+  }
+  async function togglePublish(p) {
+    try {
+      await api.patch(`/admin/projects/${p._id}/publish`, {
+        status: p.status === "published" ? "draft" : "published",
+      });
+      await load();
+    } catch (e) {
+      setNotice(e.response?.data?.message || "Could not update status.");
+    }
+  }
+  async function saveProfile(e) {
+    e.preventDefault();
+    try {
+      await api.patch("/admin/profile", profile);
+      setNotice("Profile updated.");
+    } catch (e) {
+      setNotice(e.response?.data?.message || "Could not save profile.");
+    }
+  }
+  async function markRead(m) {
+    try {
+      await api.patch(`/admin/messages/${m._id}/read`, { isRead: !m.isRead });
+      await load();
+    } catch (e) {
+      setNotice("Could not update message.");
+    }
+  }
+  async function deleteMessage(m) {
+    if (!confirm("Delete this contact message?")) return;
+    try {
+      await api.delete(`/admin/messages/${m._id}`);
+      await load();
+    } catch (e) {
+      setNotice("Could not delete message.");
+    }
+  }
+  async function addSkill(e) {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    try {
+      await api.post("/admin/skills", {
+        name: f.get("name"),
+        category: f.get("category"),
+      });
+      e.currentTarget.reset();
+      await load();
+      setNotice("Skill added.");
+    } catch (e) {
+      setNotice(e.response?.data?.message || "Could not add skill.");
+    }
+  }
+  async function deleteSkill(s) {
+    if (!confirm(`Delete skill ${s.name}?`)) return;
+    try {
+      await api.delete(`/admin/skills/${s._id}`);
+      await load();
+    } catch (e) {
+      setNotice("Could not delete skill.");
+    }
+  }
+  const menu = [
+    ["overview", "Overview", LayoutDashboard],
+    ["projects", "Projects", FolderKanban],
+    ["profile", "Profile", UserRound],
+    ["skills", "Skills", Code2],
+    ["messages", "Messages", MessageSquare],
+  ];
+  if (loading && !admin)
+    return <div className="loading-screen">Loading your workspace…</div>;
+  return (
+    <div className="admin-layout">
+      <aside className="admin-sidebar">
+        <Link className="brand" to="/">
+          <span className="brand-mark">AV</span>
+          <span>
+            Ankur<span className="muted">.dev</span>
+          </span>
+        </Link>
+        <div className="admin-side-label">WORKSPACE</div>
+        {menu.map(([key, label, Icon]) => (
+          <button
+            key={key}
+            className={`side-link ${section === key ? "active" : ""}`}
+            onClick={() => {
+              setSection(key);
+              setEditing(null);
+              setNotice("");
+            }}
+          >
+            <Icon size={17} />
+            {label}
+            {key === "messages" && stats.unreadMessages > 0 && (
+              <span className="side-count">{stats.unreadMessages}</span>
+            )}
+          </button>
+        ))}
+        <div className="sidebar-bottom">
+          <div className="admin-avatar">
+            {admin?.email?.[0]?.toUpperCase() || "A"}
+          </div>
+          <div className="admin-user">
+            <strong>Administrator</strong>
+            <span>{admin?.email}</span>
+          </div>
+          <button className="icon-button" onClick={logout} aria-label="Log out">
+            <LogOut size={17} />
+          </button>
+        </div>
+      </aside>
+      <main className="admin-main">
+        <header className="admin-topbar">
+          <div>
+            <span className="section-index">ANKUR.DEV / ADMIN</span>
+            <h1>{menu.find((m) => m[0] === section)?.[1] || "Dashboard"}</h1>
+          </div>
+          <a
+            href="/"
+            className="btn btn-ghost small-btn"
+            target="_blank"
+            rel="noreferrer"
+          >
+            View site <ArrowUpRight size={15} />
+          </a>
+        </header>
+        {notice && (
+          <div className="notice-banner">
+            <CheckCircle2 size={16} />
+            {notice}
+            <button onClick={() => setNotice("")}>
+              <X size={14} />
+            </button>
+          </div>
+        )}
+        {section === "overview" && (
+          <>
+            <div className="admin-stats">
+              {[
+                ["Total projects", stats.totalProjects, FolderKanban],
+                ["Published", stats.publishedProjects, CheckCircle2],
+                ["Drafts", stats.draftProjects, Layers3],
+                ["Featured", stats.featuredProjects, Sparkles],
+                ["Messages", stats.totalMessages, MessageSquare],
+                ["Unread", stats.unreadMessages, Mail],
+              ].map(([label, value, Icon]) => (
+                <div className="stat-card" key={label}>
+                  <div className="stat-icon">
+                    <Icon size={18} />
+                  </div>
+                  <span>{label}</span>
+                  <strong>{value ?? "—"}</strong>
+                </div>
+              ))}
+            </div>
+            <div className="admin-panel">
+              <div className="panel-heading">
+                <div>
+                  <h2>Recent projects</h2>
+                  <p>Keep your best work fresh and accurate.</p>
+                </div>
+                <button
+                  className="btn btn-primary small-btn"
+                  onClick={newProject}
+                >
+                  <Plus size={15} /> Add project
+                </button>
+              </div>
+              <ProjectTable
+                projects={projects.slice(0, 5)}
+                editProject={editProject}
+                deleteProject={deleteProject}
+                togglePublish={togglePublish}
+              />
+            </div>
+            <div className="admin-panel">
+              <div className="panel-heading">
+                <div>
+                  <h2>Latest messages</h2>
+                  <p>Recent conversations from your contact form.</p>
+                </div>
+                <button
+                  className="text-action"
+                  onClick={() => setSection("messages")}
+                >
+                  View all →
+                </button>
+              </div>
+              <MessageList
+                messages={messages.slice(0, 4)}
+                markRead={markRead}
+                deleteMessage={deleteMessage}
+              />
+            </div>
+          </>
+        )}
+        {section === "projects" && (
+          <div className="admin-panel">
+            <div className="panel-heading">
+              <div>
+                <h2>{editing ? "Edit project" : "Project library"}</h2>
+                <p>Create, update, publish or remove portfolio projects.</p>
+              </div>
+              {!editing && (
+                <button
+                  className="btn btn-primary small-btn"
+                  onClick={newProject}
+                >
+                  <Plus size={15} /> New project
+                </button>
+              )}
+            </div>
+            {editing ? (
+              <form className="project-editor" onSubmit={saveProject}>
+                <div className="form-pair">
+                  <label>
+                    Project title *
+                    <input
+                      required
+                      value={draft.title || ""}
+                      onChange={(e) =>
+                        setDraft({ ...draft, title: e.target.value })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Category
+                    <input
+                      value={draft.category || ""}
+                      onChange={(e) =>
+                        setDraft({ ...draft, category: e.target.value })
+                      }
+                    />
+                  </label>
+                </div>
+                <label>
+                  Short description *
+                  <textarea
+                    required
+                    maxLength="240"
+                    rows="2"
+                    value={draft.shortDescription || ""}
+                    onChange={(e) =>
+                      setDraft({ ...draft, shortDescription: e.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  Detailed description
+                  <textarea
+                    rows="4"
+                    value={draft.description || ""}
+                    onChange={(e) =>
+                      setDraft({ ...draft, description: e.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  Technologies <span className="muted">(comma separated)</span>
+                  <input
+                    value={draft.technologies || ""}
+                    onChange={(e) =>
+                      setDraft({ ...draft, technologies: e.target.value })
+                    }
+                    placeholder="React, Node.js, MongoDB"
+                  />
+                </label>
+                <label>
+                  Key features <span className="muted">(one per line)</span>
+                  <textarea
+                    rows="3"
+                    value={draft.features || ""}
+                    onChange={(e) =>
+                      setDraft({ ...draft, features: e.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  Cover image{" "}
+                  <span className="muted">(JPG, PNG or WEBP; max 5 MB)</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => uploadCoverImage(e.target.files?.[0])}
+                  />
+                  {draft.coverImage?.url && (
+                    <div className="cover-preview">
+                      <img
+                        src={draft.coverImage.url}
+                        alt="Project cover preview"
+                      />
+                      <button
+                        type="button"
+                        className="text-action danger-text"
+                        onClick={() =>
+                          setDraft({
+                            ...draft,
+                            coverImage: { url: "", publicId: "" },
+                          })
+                        }
+                      >
+                        Remove image
+                      </button>
+                    </div>
+                  )}
+                </label>
+                <div className="form-pair">
+                  <label>
+                    GitHub URL
+                    <input
+                      type="url"
+                      value={draft.repositoryUrl || ""}
+                      onChange={(e) =>
+                        setDraft({ ...draft, repositoryUrl: e.target.value })
+                      }
+                      placeholder="https://github.com/..."
+                    />
+                  </label>
+                  <label>
+                    Live demo URL
+                    <input
+                      type="url"
+                      value={draft.liveDemoUrl || ""}
+                      onChange={(e) =>
+                        setDraft({ ...draft, liveDemoUrl: e.target.value })
+                      }
+                      placeholder="https://..."
+                    />
+                  </label>
+                </div>
+                <label>
+                  Case study URL
+                  <input
+                    type="url"
+                    value={draft.caseStudyUrl || ""}
+                    onChange={(e) =>
+                      setDraft({ ...draft, caseStudyUrl: e.target.value })
+                    }
+                  />
+                </label>
+                <div className="editor-options">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(draft.featured)}
+                      onChange={(e) =>
+                        setDraft({ ...draft, featured: e.target.checked })
+                      }
+                    />{" "}
+                    Featured project
+                  </label>
+                  <label>
+                    Status
+                    <select
+                      value={draft.status || "draft"}
+                      onChange={(e) =>
+                        setDraft({ ...draft, status: e.target.value })
+                      }
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
+                    </select>
+                  </label>
+                </div>
+                <div className="editor-actions">
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={() => setEditing(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button className="btn btn-primary">
+                    Save project <ArrowUpRight size={15} />
+                  </button>
+                </div>
+                <p className="muted small">
+                  Images require Cloudinary credentials in the backend
+                  environment. Save the project after uploading its cover image.
+                </p>
+              </form>
+            ) : (
+              <ProjectTable
+                projects={projects}
+                editProject={editProject}
+                deleteProject={deleteProject}
+                togglePublish={togglePublish}
+              />
+            )}
+          </div>
+        )}
+        {section === "profile" && (
+          <div className="admin-panel">
+            <div className="panel-heading">
+              <div>
+                <h2>Public profile</h2>
+                <p>Changes appear on the public portfolio.</p>
+              </div>
+            </div>
+            <form className="project-editor" onSubmit={saveProfile}>
+              <label>
+                Full name
+                <input
+                  value={profile.name || ""}
+                  onChange={(e) =>
+                    setProfile({ ...profile, name: e.target.value })
+                  }
+                />
+              </label>
+              <label>
+                Headline
+                <input
+                  value={profile.headline || ""}
+                  onChange={(e) =>
+                    setProfile({ ...profile, headline: e.target.value })
+                  }
+                />
+              </label>
+              <label>
+                Biography
+                <textarea
+                  rows="5"
+                  value={profile.biography || ""}
+                  onChange={(e) =>
+                    setProfile({ ...profile, biography: e.target.value })
+                  }
+                />
+              </label>
+              <div className="form-pair">
+                <label>
+                  Location
+                  <input
+                    value={profile.location || ""}
+                    onChange={(e) =>
+                      setProfile({ ...profile, location: e.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  Email
+                  <input
+                    type="email"
+                    value={profile.email || ""}
+                    onChange={(e) =>
+                      setProfile({ ...profile, email: e.target.value })
+                    }
+                  />
+                </label>
+              </div>
+              <div className="form-pair">
+                <label>
+                  GitHub URL
+                  <input
+                    value={profile.github || ""}
+                    onChange={(e) =>
+                      setProfile({ ...profile, github: e.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  LinkedIn URL
+                  <input
+                    value={profile.linkedin || ""}
+                    onChange={(e) =>
+                      setProfile({ ...profile, linkedin: e.target.value })
+                    }
+                  />
+                </label>
+              </div>
+              <label>
+                LeetCode URL
+                <input
+                  value={profile.leetcode || ""}
+                  onChange={(e) =>
+                    setProfile({ ...profile, leetcode: e.target.value })
+                  }
+                />
+              </label>
+              <label>
+                Resume URL
+                <input
+                  value={profile.resumeUrl || ""}
+                  onChange={(e) =>
+                    setProfile({ ...profile, resumeUrl: e.target.value })
+                  }
+                  placeholder="Public PDF URL"
+                />
+              </label>
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={profile.availability !== false}
+                  onChange={(e) =>
+                    setProfile({ ...profile, availability: e.target.checked })
+                  }
+                />{" "}
+                Show open-to-opportunities badge
+              </label>
+              <div className="editor-actions">
+                <button className="btn btn-primary">
+                  Save profile <ArrowUpRight size={15} />
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+        {section === "skills" && (
+          <div className="admin-panel">
+            <div className="panel-heading">
+              <div>
+                <h2>Skills library</h2>
+                <p>Add or remove skills shown on your portfolio.</p>
+              </div>
+            </div>
+            <form className="add-skill-form" onSubmit={addSkill}>
+              <input
+                name="name"
+                required
+                placeholder="Skill name (e.g. TypeScript)"
+              />
+              <input
+                name="category"
+                required
+                placeholder="Category (e.g. Backend)"
+              />
+              <button className="btn btn-primary small-btn">
+                <Plus size={15} /> Add skill
+              </button>
+            </form>
+            <div className="admin-skill-list">
+              {skills.map((s) => (
+                <div className="admin-skill" key={s._id}>
+                  <span>{s.name}</span>
+                  <small>{s.category}</small>
+                  <button
+                    className="icon-button danger"
+                    onClick={() => deleteSkill(s)}
+                    aria-label={`Delete ${s.name}`}
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              ))}
+              {!skills.length && (
+                <p className="empty-state">
+                  No database skills yet. The public site uses a starter toolkit
+                  until you add your own.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+        {section === "messages" && (
+          <div className="admin-panel">
+            <div className="panel-heading">
+              <div>
+                <h2>Inbox</h2>
+                <p>Messages submitted through your public contact form.</p>
+              </div>
+            </div>
+            <MessageList
+              messages={messages}
+              markRead={markRead}
+              deleteMessage={deleteMessage}
+            />
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+function ProjectTable({ projects, editProject, deleteProject, togglePublish }) {
+  return (
+    <div className="table-wrap">
+      <table className="admin-table">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Status</th>
+            <th>Featured</th>
+            <th>Updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {projects.map((p) => (
+            <tr key={p._id}>
+              <td>
+                <strong>{p.title}</strong>
+                <span className="table-sub">
+                  {p.category} · {p.slug}
+                </span>
+              </td>
+              <td>
+                <button
+                  className={`status-pill ${p.status}`}
+                  onClick={() => togglePublish(p)}
+                >
+                  {p.status === "published" ? "Published" : "Draft"}
+                </button>
+              </td>
+              <td>{p.featured ? "Yes" : "—"}</td>
+              <td>
+                {p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "—"}
+              </td>
+              <td>
+                <div className="table-actions">
+                  <button
+                    className="icon-button"
+                    onClick={() => editProject(p)}
+                    aria-label="Edit project"
+                  >
+                    <Pencil size={15} />
+                  </button>
+                  <button
+                    className="icon-button danger"
+                    onClick={() => deleteProject(p)}
+                    aria-label="Delete project"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {!projects.length && (
+        <p className="empty-state">
+          No projects yet. Create your first project to get started.
+        </p>
+      )}
+    </div>
+  );
+}
+function MessageList({ messages, markRead, deleteMessage }) {
+  return (
+    <div className="messages-list">
+      {messages.map((m) => (
+        <article
+          className={`message-item ${m.isRead ? "read" : ""}`}
+          key={m._id}
+        >
+          <div className="message-avatar">
+            {m.name?.[0]?.toUpperCase() || "?"}
+          </div>
+          <div className="message-content">
+            <div className="message-heading">
+              <strong>{m.name}</strong>
+              <span>{new Date(m.createdAt).toLocaleString()}</span>
+            </div>
+            <div className="message-subject">
+              {m.subject} · {m.email}
+            </div>
+            <p>{m.message}</p>
+            <div className="message-actions">
+              <button className="text-action" onClick={() => markRead(m)}>
+                {m.isRead ? "Mark unread" : "Mark read"}
+              </button>
+              <button
+                className="text-action danger-text"
+                onClick={() => deleteMessage(m)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+          {!m.isRead && <span className="unread-indicator" />}
+        </article>
+      ))}
+      {!messages.length && (
+        <p className="empty-state">
+          Your inbox is empty for now. New contact form submissions will appear
+          here.
+        </p>
+      )}
+    </div>
+  );
+}
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/admin" element={<AdminLogin />} />
+      <Route path="/admin/*" element={<AdminShell />} />
+      <Route path="*" element={<Home />} />
+    </Routes>
+  );
+}
